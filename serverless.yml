@@ -1,4 +1,4 @@
-service: serverless-embedings-generator
+service: serverless-embeddings-generator
 
 frameworkVersion: '3'
 
