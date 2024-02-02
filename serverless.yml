@@ -5,10 +5,33 @@ frameworkVersion: '3'
 provider:
   name: aws
   runtime: python3.9
+  stage: ${opt:stage, 'dev'}
+  environment:
+    SOURCES_BUCKET_NAME: ${construct:SourcesBucket.bucketName}
+    EMBEDDINGS_QUEUE_URL: ${construct:EmbeddingsQueue.queueUrl}
 
+constructs:
+    SourcesBucket:
+      type: storage
+    EmbeddingsQueue:
+      type: queue
+      worker:
+        handler: src/generate_embeddings.run
+        timeout: 30
+        maxConcurrency: 10
+            
 functions:
-  hello:
-    handler: handler.hello
+  enqueue:
+    handler: src/enqueue.run
+    events:
+      - s3:
+          bucket: ${construct:SourcesBucket.bucketName}
+          event: s3:ObjectCreated:*
+          rules:
+            - prefix: raw/
+            - suffix: .html
+          existing: true
+
 
 plugins:
   - serverless-python-requirements
