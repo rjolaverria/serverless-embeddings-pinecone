@@ -12,11 +12,46 @@ authorAvatar: 'https://avatars1.githubusercontent.com/u/13742415?s=200&v=4'
 -->
 
 
-# Serverless Framework AWS Python Example
+# Serverless Embeddings Generator - Serverless Framework AWS
 
-This template demonstrates how to deploy a Python function running on AWS Lambda using the traditional Serverless Framework. The deployed function does not include any event definitions as well as any kind of persistence (database). For more advanced configurations check out the [examples repo](https://github.com/serverless/examples/) which includes integrations with SQS, DynamoDB or examples of functions that are triggered in `cron`-like manner. For details about configuration of specific `events`, please refer to our [documentation](https://www.serverless.com/framework/docs/providers/aws/events/).
+This was generated using the Serverless Framework AWS Python template. 
+
+This is an example of a way to generate embeddings for documents stored in an S3 bucket usings Lambda, SQS, Aurora/RDS(Postgres) and OpenAI.
+
+## Plugins
+- serverless-python-requirements
+- serverless-lift
+
+## Architecture
+![diagram](./images/serverless-embedding.png)
+
 
 ## Usage
+
+Install the Serverless Framework:
+
+```bash
+npm install -g serverless
+```
+
+Install the dependencies:
+
+```bash
+npm install
+```
+
+Add your environment variables to a `.env` file in the root of the project. 
+
+```bash
+cp .env.local .env.dev
+cp .env.local .env
+```
+
+**Note:** You need to install the `pgvector` extension in your RDS instance. 
+
+```sql
+CREATE EXTENSION vector;
+```
 
 ### Deployment
 
@@ -29,12 +64,16 @@ $ serverless deploy
 After running deploy, you should see output similar to:
 
 ```bash
-Deploying aws-python-project to stage dev (us-east-1)
+Deploying serverless-embeddings-generator to stage dev (us-east-1)
 
-✔ Service deployed to stack aws-python-project-dev (112s)
+✔ Service deployed to stack serverless-embeddings-generator-dev (70s)
 
 functions:
-  hello: aws-python-project-dev-hello (1.5 kB)
+  enqueue: serverless-embeddings-generator-dev-enqueue (25 MB)
+  testEmbeddings: serverless-embeddings-generator-dev-testEmbeddings (25 MB)
+  EmbeddingsQueueWorker: serverless-embeddings-generator-dev-EmbeddingsQueueWorker (25 MB)
+SourcesBucket: serverless-embeddings-generator-sourcesbucket
+EmbeddingsQueue: https://sqs.us-east-1.amazonaws.com/....
 ```
 
 ### Invocation
@@ -42,32 +81,19 @@ functions:
 After successful deployment, you can invoke the deployed function by using the following command:
 
 ```bash
-serverless invoke --function hello
+sls invoke -f testEmbeddings --data "hello world"  
 ```
 
 Which should result in response similar to the following:
 
 ```json
 {
-    "statusCode": 200,
-    "body": "{\"message\": \"Go Serverless v3.0! Your function executed successfully!\", \"input\": {}}"
-}
-```
-
-### Local development
-
-You can invoke your function locally by using the following command:
-
-```bash
-serverless invoke local --function hello
-```
-
-Which should result in response similar to the following:
-
-```
-{
-    "statusCode": 200,
-    "body": "{\"message\": \"Go Serverless v3.0! Your function executed successfully!\", \"input\": {}}"
+    "results": [
+        [
+            "hello there friend",
+            "source_of_doc",
+            0.90
+        ],
 }
 ```
 

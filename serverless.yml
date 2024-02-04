@@ -2,11 +2,20 @@ service: serverless-embeddings-generator
 
 frameworkVersion: '3'
 
+useDotenv: true
+
 provider:
   name: aws
   runtime: python3.9
   stage: ${opt:stage, 'dev'}
   environment:
+    DB_HOST: ${env:DB_HOST}
+    DB_PORT: ${env:DB_PORT}
+    DB_NAME: ${env:DB_NAME}
+    DB_USER: ${env:DB_USER}
+    DB_PASSWORD: ${env:DB_PASSWORD}
+    OPENAI_API_KEY: ${env:OPENAI_API_KEY}
+    EMBEDDING_MODEL: ${env:EMBEDDING_MODEL}
     SOURCES_BUCKET_NAME: ${construct:SourcesBucket.bucketName}
     EMBEDDINGS_QUEUE_URL: ${construct:EmbeddingsQueue.queueUrl}
 
@@ -16,13 +25,13 @@ constructs:
     EmbeddingsQueue:
       type: queue
       worker:
-        handler: src/generate_embeddings.run
+        handler: src/handlers/generate_embeddings.run
         timeout: 30
-        maxConcurrency: 10
+        maxConcurrency: 10 # keep db connections low
             
 functions:
   enqueue:
-    handler: src/enqueue.run
+    handler: src/handlers/enqueue.run
     events:
       - s3:
           bucket: ${construct:SourcesBucket.bucketName}
@@ -31,8 +40,13 @@ functions:
             - prefix: raw/
             - suffix: .html
           existing: true
-
+  testEmbeddings:
+    handler: src/handlers/test_embeddings.run
 
 plugins:
   - serverless-python-requirements
   - serverless-lift
+
+custom:
+  pythonRequirements:
+    dockerizePip: true
