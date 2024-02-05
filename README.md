@@ -12,11 +12,11 @@ authorAvatar: 'https://avatars1.githubusercontent.com/u/13742415?s=200&v=4'
 -->
 
 
-# Serverless Embeddings Generator - Serverless Framework AWS
+# Serverless Embeddings Generate & Store - Serverless Framework AWS
 
 This was generated using the Serverless Framework AWS Python template. 
 
-This is an example of a way to generate embeddings for documents stored in an S3 bucket usings Lambda, SQS, Aurora/RDS(Postgres) and OpenAI.
+This is an example of a way to generate and store embeddings for new documents in an S3 bucket usings Lambda, SQS, Postgres(pgvector) and OpenAI(text-embedding-ada-002).
 
 ## Plugins
 - serverless-python-requirements
@@ -47,7 +47,7 @@ cp .env.local .env.dev
 cp .env.local .env
 ```
 
-**Note:** You need to install the `pgvector` extension in your RDS instance. 
+**Note:** You need to install the `pgvector` extension in your RDS instance. We are also not indexing the vectors in this example.
 
 ```sql
 CREATE EXTENSION vector;

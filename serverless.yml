@@ -1,4 +1,4 @@
-service: serverless-embeddings-generator
+service: serverless-embeddings-pgvector
 
 frameworkVersion: '3'
 
