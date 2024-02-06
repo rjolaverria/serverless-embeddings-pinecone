@@ -16,7 +16,7 @@ authorAvatar: 'https://avatars1.githubusercontent.com/u/13742415?s=200&v=4'
 
 This was generated using the Serverless Framework AWS Python template. 
 
-This is an example of a way to generate and store embeddings for new documents in an S3 bucket usings Lambda, SQS, Postgres(pgvector) and OpenAI(text-embedding-ada-002).
+This is an example of a way to generate and store embeddings for new documents in an S3 bucket usings Lambda, SQS, Pinecone(Serverless) and OpenAI(text-embedding-ada-002).
 
 ## Plugins
 - serverless-python-requirements
@@ -45,12 +45,6 @@ Add your environment variables to a `.env` file in the root of the project.
 ```bash
 cp .env.local .env.dev
 cp .env.local .env
-```
-
-**Note:** You need to install the `pgvector` extension in your RDS instance. We are also not indexing the vectors in this example.
-
-```sql
-CREATE EXTENSION vector;
 ```
 
 ### Deployment
@@ -88,12 +82,22 @@ Which should result in response similar to the following:
 
 ```json
 {
-    "results": [
-        [
-            "hello there friend",
-            "source_of_doc",
-            0.90
-        ],
+    "matches": [
+        {
+            "id": "7e0807da-ef2c-4ffb-8a0f-45ae9f4aa20e#chunk1",
+            "score": 0.801362216,
+            "values": [],
+            "metadata": {
+                "chunk_index": 0,
+                "source_url": "source.com",
+                "text": "hello there friend"
+            }
+        },
+    ],
+    "namespace": "",
+    "usage": {
+        "read_units": 6
+    }
 }
 ```
 

@@ -1,7 +1,7 @@
 import json
 import logging
 from .utils.BucketClient import BucketClient
-from .utils.EmbeddingsStore import EmbeddingsStore
+from .utils.PineconeClient import PineconeClient
 from .utils.OpenAIClient import OpenAIClient
 from .utils.text import get_text_from_page, split_into_chunks
 
@@ -15,7 +15,7 @@ def run(event, context):
 
         try:
             openAI = OpenAIClient()
-            store = EmbeddingsStore()
+            pinecone = PineconeClient()
             bucket = BucketClient()
 
             # process records in the batch
@@ -26,14 +26,10 @@ def run(event, context):
                 (source, text) = bucket.get_bucket_item(body["key"])
                 text = get_text_from_page(text)
                 chunks = split_into_chunks(text)
+                embeddings = [openAI.get_embedding(chunk) for chunk in chunks]
 
                 # fetch and store the embeddings
-                with store:
-                    for i, chunk in enumerate(chunks):
-                        embedding = openAI.get_embedding(chunk)
-                        store.store_embedding(
-                            text=chunks[i], embedding=str(embedding), source_url=source
-                        )
+                pinecone.store_embeddings(chunks, embeddings, source)
 
         except Exception as e:
             batch_item_failures.append({"itemIdentifier": record["messageId"]})

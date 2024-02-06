@@ -1,5 +1,6 @@
+import json
 import logging
-from .utils.EmbeddingsStore import EmbeddingsStore
+from .utils.PineconeClient import PineconeClient
 from .utils.OpenAIClient import OpenAIClient
 
 logger = logging.getLogger(__name__)
@@ -10,15 +11,12 @@ def run(event, context):
     response = {}
     try:
         openAI = OpenAIClient()
-        store = EmbeddingsStore()
+        pinecone = PineconeClient()
 
-        promptEmbedding = openAI.get_embedding(event)
+        promptEmbed = openAI.get_embedding(event)
 
-        with store:
-            results = store.get_by_cosine_similarity(
-                embedding=str(promptEmbedding), threshold=0.75, limit=5
-            )
-        response["results"] = results
+        if promptEmbed:
+            response = pinecone.get_by_cosine_similarity(embed=promptEmbed, limit=5)
     except Exception as e:
         logger.error(f"Error occurred while running: {e}")
         raise e

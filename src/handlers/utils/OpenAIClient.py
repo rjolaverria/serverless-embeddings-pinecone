@@ -12,7 +12,7 @@ class OpenAIClient:
 
     def get_embedding(self, text: str):
         try:
-            return str(
+            return (
                 self.client.embeddings.create(input=text, model=self.embedding_model)
                 .data[0]
                 .embedding
