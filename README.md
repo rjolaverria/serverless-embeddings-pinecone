@@ -25,6 +25,9 @@ This is an example of a way to generate and store embeddings for new documents i
 ## Architecture
 ![diagram](./images/serverless-embedding.png)
 
+## Requirements
+- Docker
+- NPM
 
 ## Usage
 
